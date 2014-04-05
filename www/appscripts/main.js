@@ -15,6 +15,8 @@ require(
 
 	function (require, utils, sndFactory) {
 
+		navigator.vibrate = navigator.vibrate || navigator.webkitVibrate || navigator.mozVibrate;
+
 		var ypos=0;
 		var sound=[];
 
@@ -24,6 +26,7 @@ require(
 			sound[i].setParam("Gain", 2);
 			sound[i].location = {};
 			sound[i].dist=0; // initialize to be zero distance from the pointer
+			sound[i].eligible=true;
 		}
 
 		sound[0].location.x=0;
@@ -86,7 +89,7 @@ require(
 
 		var getLocation = function(){
 		  if (navigator.geolocation){
-		    	navigator.geolocation.watchPosition(showPosition, error, { maximumAge: 3000, timeout: 5000, enableHighAccuracy: true });
+		    	navigator.geolocation.watchPosition(showPosition, error, { maximumAge: 1000, timeout: 2000, enableHighAccuracy: true });
 		    }
 		  else{
 		  	console.log( "Geolocation is not supported by this browser.");
@@ -134,14 +137,27 @@ require(
 		for (var i=0;i<5;i++){
 			distance=dist(sound[i].location, dir);
 			if ((distance < 15) && (sound[i].dist > 15)) {
-				sound[i].setParam("play", 1);
+				if (sound[i].eligible===true){
+					sound[i].setParam("play", 1);
+					if (navigator.vibrate) {
+	  					navigator.vibrate(300);
+					}
+					sound[i].eligible=false; // don't play again until you move far from this sound
+					document.getElementById("snd"+i+"box").checked = true;
+				}
 			}
 			if ((distance >= 15) && (sound[i].dist < 15)) {
 				sound[i].setParam("play", 0);
 			}
+
+			// this prevents sounds from playing multiple time when pointing near its border
+			if (distance > 30) {
+				sound[i].eligible=true;
+			}
+
 			sound[i].dist=distance;
 
-			console.log("distance to sound " + i + " is " + distance);
+			//console.log("distance to sound " + i + " is " + distance);
 
 			if (mindist > distance ){
 				mindist=distance;
@@ -150,7 +166,7 @@ require(
 			}
 
 
-		}
+		}  // for each sound
 
 
 		}
