@@ -3,12 +3,14 @@
 <html>
     <head>
         <link rel="stylesheet" type="text/css" href="css/appstyle.css">
+        <link rel="stylesheet" type="text/css" href="css/userConfig.css">  
          <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1,user-scalable=no">   
         <title>Title</title>
         <meta name="description" content="action messaging">
         <script type="text/javascript" data-main="appscripts/main.js" src="jslibs/require.js"></script>
     </head>
     <body >
+    <div id="wrap">
         <div id="app">
             <h3> Five Hidden Sounds  </h3>
             <div id="SimpleDiv">
@@ -16,9 +18,9 @@
             </div>
          </div>
          <div datadiv>
-            x-angle: <input type="text" id="tx" name="x-tilt" value="0"><br>
+            x-angle: <input type="text" id="tx" name="x-tilt" value="0"><br> 
             y-angle: <input type="text" id="ty" name="y-tilt" value="1"><br>
-            z-angle: <input type="text" id="tz" name="y-tilt" value="2"><br><br>
+            z-angle: <input type="text" id="tz" name="z-tilt" value="2"><br><br>
            <div id="SimpleDiv">
                 GPS info (not used)<br>
             </div>  
@@ -35,6 +37,7 @@
             <input type="checkbox" name="vehicle" id="snd3box" disabled>sound 3 <br>
             <input type="checkbox" name="vehicle" id="snd4box" disabled>sound 4 <br>
        </form>
+       </div>
     </body>
 </html>
 

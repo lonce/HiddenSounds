@@ -11,16 +11,23 @@ require.config({
         }
 });
 require(
-	["require", "utils", "jsaSound/jsaModels/jsaMp3"],
+	["require", "utils", "userConfig", "jsaSound/jsaModels/jsaMp3"],
 
-	function (require, utils, sndFactory) {
+	function (require, utils, userConfig, sndFactory) {
 
 		navigator.vibrate = navigator.vibrate || navigator.webkitVibrate || navigator.mozVibrate;
 
+		var m_confirguredP=false;
+
 		var ypos=0;
 		var sound=[];
+		var k_numSounds=5;
 
-		for(var i=0;i<5;i++){
+		var dir={}; // the direction coordinates from the last orientation callback
+
+		var k_coordsystem;
+
+		for(var i=0;i<k_numSounds;i++){
 			sound[i]=sndFactory();
 			sound[i].setParam("Sound URL", "resources/sound" + (i+1) + ".mp3");
 			sound[i].setParam("Gain", 2);
@@ -28,6 +35,10 @@ require(
 			sound[i].dist=0; // initialize to be zero distance from the pointer
 			sound[i].eligible=true;
 		}
+
+
+
+
 
 		sound[0].location.x=0;
 		sound[0].location.y=45;
@@ -50,7 +61,7 @@ require(
 		sound[4].location.z=0;
 
 		dist = function (l1, l2){
-			dx=Math.abs(l1.x-l2.x);
+			dx=0;//Math.abs(l1.x-l2.x);
 			dy=Math.abs(l1.y-l2.y);
 			dz=Math.abs(l1.z-l2.z);
 
@@ -105,7 +116,7 @@ require(
 */
 		// all in degrees
 		var devOrientHandler = function(eventData){
-		    m_tx.value = eventData.gamma.toFixed(2);  
+		    m_tx.value = "not used"; //eventData.gamma.toFixed(2);  
 		    m_ty.value = eventData.beta.toFixed(2);  
 		    m_tz.value = eventData.alpha.toFixed(2);  
 
@@ -124,49 +135,50 @@ require(
 
 		    ypos = eventData.beta;
 */
-		var dir={};
-		dir.x=eventData.gamma;
-		dir.y=eventData.beta;
-		dir.z=eventData.alpha;
 
-		var distance;
+			dir.x=eventData.gamma;
+			dir.y=eventData.beta;
+			dir.z=eventData.alpha;
 
-		var mindist=1000000000000;
-		var mini=-1;
+			if (! m_confirguredP) return; // don't play sounds until we've oriented ourselves in the configuration dialogue
 
-		for (var i=0;i<5;i++){
-			distance=dist(sound[i].location, dir);
-			if ((distance < 15) && (sound[i].dist > 15)) {
-				if (sound[i].eligible===true){
-					sound[i].setParam("play", 1);
-					if (navigator.vibrate) {
-	  					navigator.vibrate(300);
+			var distance;
+
+			var mindist=1000000000000;
+			var mini=-1;
+
+			for (var i=0;i<k_numSounds;i++){
+				distance=dist(sound[i].location, dir);
+				if ((distance < 15) && (sound[i].dist > 15)) {
+					if (sound[i].eligible===true){
+						sound[i].setParam("play", 1);
+						if (navigator.vibrate) {
+		  					navigator.vibrate(300);
+						}
+						sound[i].eligible=false; // don't play again until you move far from this sound
+						document.getElementById("snd"+i+"box").checked = true;
 					}
-					sound[i].eligible=false; // don't play again until you move far from this sound
-					document.getElementById("snd"+i+"box").checked = true;
 				}
-			}
-			if ((distance >= 15) && (sound[i].dist < 15)) {
-				sound[i].setParam("play", 0);
-			}
+				if ((distance >= 15) && (sound[i].dist < 15)) {
+					sound[i].setParam("play", 0);
+				}
 
-			// this prevents sounds from playing multiple time when pointing near its border
-			if (distance > 30) {
-				sound[i].eligible=true;
-			}
+				// this prevents sounds from playing multiple time when pointing near its border
+				if (distance > 30) {
+					sound[i].eligible=true;
+				}
 
-			sound[i].dist=distance;
+				sound[i].dist=distance;
 
-			//console.log("distance to sound " + i + " is " + distance);
+				//console.log("distance to sound " + i + " is " + distance);
 
-			if (mindist > distance ){
-				mindist=distance;
-				mini=i;
-				m_msg.value="dist to sound["+i+"] = " + mindist.toFixed(2);
-			}
+				if (mindist > distance ){
+					mindist=distance;
+					mini=i;
+					m_msg.value="dist to sound["+i+"] = " + mindist.toFixed(2);
+				}
 
-
-		}  // for each sound
+			}  // for each sound
 
 
 		}
@@ -179,12 +191,32 @@ require(
 		}
 
 
-		document.onmousedown=function(){
-			devOrientHandler({"gamma":0, "beta":0, "alpha":0});
-			sound[(soundnum++)%5].setParam("play", 1);
-		};
 
 
 	getLocation();
+
+
+	userConfig.report(function(){
+		if (userConfig.player === "world"){
+			console.log("you will play with world compass coordinates");
+		} else{
+
+			console.log("rotating sounnd positions around person facing in the direction: " + dir.z);
+			for (var i=0;i<k_numSounds;i++){
+				sound[i].location.z = (sound[i].location.z + dir.z)%360;
+			}
+		}
+
+		m_confirguredP=true;
+
+		// just for testing sounds on the desktop ...
+		document.onmousedown=function(){
+			devOrientHandler({"gamma":0, "beta":0, "alpha":0});
+			sound[(soundnum++)%k_numSounds].setParam("play", 1);
+		};
+
+	});
+
+
 	}
 );
