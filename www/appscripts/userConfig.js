@@ -3,12 +3,16 @@ Just include this file in a require module, no need to call anything.
 */
 
 define(
-  [],
-  function(){
+  ["jsaSound/jsaModels/jsaMp3"],
+  function(sndFactory){
 
     var uconfig = {
       "coords": undefined,
     };
+
+    var okSound=sndFactory();
+    okSound.setParam("Sound URL", "resources/sound0.mp3");
+    okSound.setParam("Gain", 2);
 
     uconfig.report = function(c_id) {
       var form = document.createElement("form", "report_form");
@@ -78,6 +82,7 @@ define(
           }
           if (!checked) return false;
 
+          okSound.setParam("play", 1);
           e.preventDefault();
           uconfig.player = el.value;
           var element = document.getElementById('overlay');
