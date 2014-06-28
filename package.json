@@ -1,0 +1,20 @@
+{
+  "name": "HiddenSounds",
+  "version": "1.0.0",
+  "description": "Just a little game to find sounds by pointing with a mobile device",
+  "main": "hiddenSoundsServer.js",
+  "dependencies": {
+    "express": "~3.5.1",
+    "socket.io": "~0.9.16"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lonce/HiddenSounds.git"
+  },
+  "author": "Lonce Wyse",
+  "license": "lgpl"
+}
